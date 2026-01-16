@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drink Stats</title>
 </head>
+
 <body>
 
     <script src="src/cookies.js"></script>
+    <script src="src/graph.js"></script>
 
     <div class="logDrink" style="padding: 1%;background-color: rgb(68, 68, 66); border-radius: 10px; padding: 10px;">
         <input id="drankInput" placeholder="Log drink" list="savedDrinks" style="height:40px;">
@@ -18,23 +21,37 @@
     </div>
 
     <div class="recentLogs" style=" height: 400px;">
-    
+
         <h1>All Drinks</h1>
         <label for="sort">Sort order:</label>
         <select id="sortCrit" name="sort" onchange="loadRecentDrinks()">
-            <option value="added">Last added</option>
             <option value="drank">Last drank</option>
+            <option value="added">Last added</option>
             <option value="alpha">Alphabetical</option>
         </select>
 
-        <input id="sortDir" type="button" value="▼" onclick="switchSortOrder()"> 
+        <input id="sortDir" type="button" value="▼" onclick="switchSortOrder()">
 
         <hr style="border-width: 2px;">
         <div style=" border-style: solid; height: 50%; overflow-y:auto;" id="recentList">
         </div>
     </div>
 
+    <div class="textStats">
+        <p id="statsText">Total Drank: 0</p>
+    </div>
+
+    <br>
+
+    <h1 style="text-align: center;">Flavors</h1>
+    <div class="flavorGraph" style="height: 405px; width: 90%; margin: 5%; margin-top: 0px; overflow-y:auto; border-style: solid;">
+
+        <canvas id="flavorCanvas" height="400" width="0"></canvas>
+
+    </div>
+
     <script src="src/main.js"></script>
 
 </body>
+
 </html>

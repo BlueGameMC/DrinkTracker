@@ -20,7 +20,10 @@ for (var i = 0; i < drinkArray.length; i++) {
     drinkDropdown.innerHTML += '<option value="' + drinkArray[i] + '"></option>';
 }
 
+updateStats();
 loadRecentDrinks();
+
+createFlavorGraph();
 
 function loadRecentDrinks() {
     let reDrinksArray = sortLastList();
@@ -28,7 +31,7 @@ function loadRecentDrinks() {
     for (var i = 1; i <= reDrinksArray.length; i++) {
         let currentDrink = reDrinksArray[reDrinksArray.length - i].split("~");
         let drinkPar = "\'" + currentDrink[0] + "\'" + "," + "\'" + currentDrink[1] + "\'";
-        recentList.innerHTML += '<a>' + currentDrink[0] + " - " + currentDrink[1] + '</a> <input id="editButton" style="float:right; position:relative; margin-right:10px" type="button" value="🖉" onclick="editDrink(' + drinkPar + ')"> <input id="deleteButton" style="float:right; margin-right:10px;" type="button" value="X" onclick="deleteDrink(' + drinkPar + ')"> <hr>';
+        recentList.innerHTML += '<a>' + currentDrink[0] + " - " + currentDrink[1] + '</a> <input id="editButton" style="float:right; position:relative; margin-right:10px" type="button" value="E" onclick="editDrink(' + drinkPar + ')"> <input id="deleteButton" style="float:right; margin-right:10px;" type="button" value="X" onclick="deleteDrink(' + drinkPar + ')"> <hr>';
     }
 }
 
@@ -93,6 +96,40 @@ function sortLastList() {
 
     return reDrinksArray;
 
+}
+
+function createFlavorGraph()
+{
+    var flavorData = [];
+    for(let i = 0; i < drinkHistory.length; i++)
+    {
+        if(flavorDataArray(flavorData, drinkHistory[i].split("~")[0]) != false)
+        {
+            let index = flavorDataArray(flavorData, drinkHistory[i].split("~")[0]);
+            flavorData[index][1] += 1;
+        }
+        else
+        {
+            flavorData.push([drinkHistory[i].split("~")[0],1]);
+        }
+    }
+
+    console.log(flavorData);
+
+    var graph = new barGraph(flavorData, document.getElementById("flavorCanvas"), 120);
+}
+
+function flavorDataArray(arr, value)
+{
+    for(let i = 0; i < arr.length; i++)
+    {
+        element = arr[i];
+        if(element[0] == value)
+        {
+            return i;
+        }
+    }
+    return false;
 }
 
 function compareDates(date1, date2)
@@ -166,6 +203,12 @@ function findIndexofDrink(drinkList, drinkName, drinkDate) {
             return i;
         }
     }
+}
+
+function updateStats()
+{
+    let statsText = document.getElementById("statsText");
+    statsText.innerText = "Total Drank: " + drinkHistory.length;
 }
 
 function submitDrink() {
