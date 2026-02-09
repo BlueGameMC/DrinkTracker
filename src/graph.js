@@ -16,6 +16,28 @@ class barGraph
 
     }
 
+    updateData(data)
+    {
+        this.data = data;
+        this.canvas.width = (data.length + 1) * this.wDistance;
+
+        this.height = this.canvas.height;
+        this.width = this.canvas.width;
+
+        this.calculateLines();
+        this.displayGraph();
+    }
+
+    swapOrder()
+    {
+        let newData = [];
+        for(let i = this.data.length-1; i >= 0; i--)
+        {
+            newData.push(this.data[i]);
+        }
+        return newData;
+    }
+
     calculateLines()
     {
         this.linePadding = 50;
@@ -34,6 +56,10 @@ class barGraph
             {
                 this.lineCount = 5;
             }
+            else if(highestScore==1)
+            {
+                this.lineCount = 1;
+            }
             else if(highestScore%9==0)
             {
                 this.lineCount = 9;
@@ -44,11 +70,11 @@ class barGraph
             }
             else if(highestScore%3==0)
             {
-                this.lineCount = 6;
+                this.lineCount = 3;
             }
             else if(highestScore%2==0)
             {
-                this.lineCount = 6;
+                this.lineCount = 2;
             }
             else if(highestScore%4==0)
             {
@@ -59,7 +85,6 @@ class barGraph
         }
         this.lineDistance = (this.lineHeight-100) / this.lineCount;
         this.lineValue = this.highestScore/this.lineCount;
-        console.log(this.highestScore)
     }
 
     drawLines()

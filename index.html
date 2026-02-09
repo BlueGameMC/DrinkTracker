@@ -10,8 +10,12 @@
 
 <body>
 
+    <script src="src/dates.js"></script>
+
+
     <script src="src/cookies.js"></script>
     <script src="src/graph.js"></script>
+    <script src="src/calendar.js"></script>
 
     <div class="logDrink" style="padding: 1%;background-color: rgb(68, 68, 66); border-radius: 10px; padding: 10px;">
         <input id="drankInput" placeholder="Log drink" list="savedDrinks" style="height:40px;">
@@ -42,8 +46,24 @@
     </div>
 
     <br>
+    <div id="calendarParent" style="width: 400px; height: 450px; border-style: solid; ">
+        <div id="calendarTopBar" style="width: 100%; height: 50px; border-style: solid; text-align:center;">
+            <input id="calendarLeft" type="button" value="<" onclick="calendarChange(-1)" style="height:40px; width: 40px;">
+            <b id="calendarMonthName" style="text-align: center;">Month Name</b>
+            <input id="calendarLeft" type="button" value=">" onclick="calendarChange(1)" style="height:40px; width: 40px;">
 
+            <div id="calendarDaysParent" style= "display: grid; grid-template-columns: auto auto auto auto auto auto auto;"></div>
+
+        </div>
+
+    </div>
+    <br>
+
+    <label for="sort">Sort order:</label>
+    <input id="graphSortDir" type="button" value="▼" onclick="graphSwitchSortOrder()">
     <h1 style="text-align: center;">Flavors</h1>
+    
+
     <div class="flavorGraph" style="height: 405px; width: 90%; margin: 5%; margin-top: 0px; overflow-y:auto; border-style: solid;">
 
         <canvas id="flavorCanvas" height="400" width="0"></canvas>

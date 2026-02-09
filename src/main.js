@@ -17,21 +17,57 @@ var drinkHistory = arrayStringFix(getCookie("drinkHistory").split("|"));
 var drinkDropdown = document.getElementById("savedDrinks");
 
 for (var i = 0; i < drinkArray.length; i++) {
+    // console.log("Dropdown: " + i);
     drinkDropdown.innerHTML += '<option value="' + drinkArray[i] + '"></option>';
 }
 
 updateStats();
 loadRecentDrinks();
 
+var graph;
 createFlavorGraph();
 
+var calenDiv = document.getElementById("calendarParent")
+var drinkCalendar = new Calendar(new Date(),drinkHistory,calenDiv);
+function calendarChange(change)
+{
+    drinkCalendar.clearCalendar();
+    drinkCalendar.month = drinkCalendar.month + change;
+    if(drinkCalendar.month <= 0)
+    {
+        drinkCalendar.month = 12;
+        drinkCalendar.year--;
+    }
+    if(drinkCalendar.month >= 13)
+    {
+        drinkCalendar.month = 1;
+        drinkCalendar.year++;
+    }
+    drinkCalendar.createMonth();
+}
+
 function loadRecentDrinks() {
-    let reDrinksArray = sortLastList();
+    let reDrinksArray = sortLastList(false);
     recentList.innerHTML = "";
     for (var i = 1; i <= reDrinksArray.length; i++) {
+        // console.log("LoadRecent: " + i);
         let currentDrink = reDrinksArray[reDrinksArray.length - i].split("~");
         let drinkPar = "\'" + currentDrink[0] + "\'" + "," + "\'" + currentDrink[1] + "\'";
-        recentList.innerHTML += '<a>' + currentDrink[0] + " - " + currentDrink[1] + '</a> <input id="editButton" style="float:right; position:relative; margin-right:10px" type="button" value="E" onclick="editDrink(' + drinkPar + ')"> <input id="deleteButton" style="float:right; margin-right:10px;" type="button" value="X" onclick="deleteDrink(' + drinkPar + ')"> <hr>';
+        let styleOP = ""; // injects this string as a potential style tag
+        if(currentDrink[0].length > 15) // make the text smaller if its too big
+        {
+            styleOP = 'style="font-size:15px;"';
+            if(currentDrink[0].length > 20) // make the text smaller if its too big
+            {
+                styleOP = 'style="font-size:14px;"';
+                if(currentDrink[0].length > 25) // make the text smaller if its too big
+                {
+                    styleOP = 'style="font-size:13px;"';
+                }
+            }
+                
+        }
+        recentList.innerHTML += '<a '+styleOP+'>' + currentDrink[0] + " - " + currentDrink[1] + '</a> <input id="editButton" style="float:right; position:relative; margin-right:10px" type="button" value="E" onclick="editDrink(' + drinkPar + ')"> <input id="deleteButton" style="float:right; margin-right:10px;" type="button" value="X" onclick="deleteDrink(' + drinkPar + ')"> <hr>';
     }
 }
 
@@ -45,11 +81,19 @@ function switchSortOrder() {
     loadRecentDrinks();
 }
 
-function sortLastList() {
+function sortLastList(isGraph) {
     var crit = document.getElementById("sortCrit").value;
     var sortUp = document.getElementById("sortDir").value != "▲"
 
     var reDrinksArray = drinkHistory.slice();
+    if(isGraph)
+    {
+        // crit = document.getElementById("graphSortCrit").value;
+        sortUp = document.getElementById("graphSortDir").value != "▲"
+        crit = "alpha";
+        return reDrinksArray;
+    }
+
 
     if(crit == "added")
     {
@@ -58,6 +102,7 @@ function sortLastList() {
             var flippedArray = [];
             for(let i = reDrinksArray.length-1; i >= 0; i--)
             {
+                console.log("SortAdded: " + i);
                 flippedArray.push(reDrinksArray[i]);
             }
             return flippedArray;
@@ -65,10 +110,19 @@ function sortLastList() {
         return drinkHistory;
     }
 
+    let c = 0;
     while (true) {
-
+        c++;
+        // console.log("SortWhileLoop: " + c);
+        if(c > 5000)
+        {
+            alert("Sorting Error? While exceeded 5000 runs!");
+            alert(reDrinksArray);
+            return reDrinksArray;
+        }
         let valueChanged = false;
         for (let i = 0; i < reDrinksArray.length - 1; i++) {
+            // console.log("SortWhileForLoop: "+i);
             let element1 = reDrinksArray[i];
             let element2 = reDrinksArray[i + 1];
             if (crit == "alpha") {
@@ -78,13 +132,19 @@ function sortLastList() {
                     valueChanged = true;
                 }
             }
-            if(crit == "drank")
+            else if(crit == "drank")
             {
                 if ((compareDates(element1.split("~")[1],element2.split("~")[1]) == 1 && sortUp) || (compareDates(element1.split("~")[1],element2.split("~")[1]) == -1 && !sortUp)) {
                     reDrinksArray[i] = element2;
                     reDrinksArray[i + 1] = element1;
                     valueChanged = true;
+                    // console.log("DrankSwap: " +element1+ " with " + element2 + " at " + i);
                 }
+            }
+            else
+            {
+                alert("Sorting Error? Inside For Loop!");
+                valueChanged = false;
             }
 
         }
@@ -103,6 +163,7 @@ function createFlavorGraph()
     var flavorData = [];
     for(let i = 0; i < drinkHistory.length; i++)
     {
+        // console.log("FlavorGraph: " + i);
         if(flavorDataArray(flavorData, drinkHistory[i].split("~")[0]) != false)
         {
             let index = flavorDataArray(flavorData, drinkHistory[i].split("~")[0]);
@@ -114,9 +175,40 @@ function createFlavorGraph()
         }
     }
 
-    console.log(flavorData);
+    graph = new barGraph(flavorData, document.getElementById("flavorCanvas"), 120);
+}
 
-    var graph = new barGraph(flavorData, document.getElementById("flavorCanvas"), 120);
+function graphLoadRecentDrinks()
+{
+
+    let graphDrinkList = sortLastList(true);
+
+    var flavorData = [];
+    for(let i = 0; i < graphDrinkList.length; i++)
+    {
+        if(flavorDataArray(flavorData, graphDrinkList[i].split("~")[0]) != false)
+        {
+            let index = flavorDataArray(flavorData, graphDrinkList[i].split("~")[0]);
+            flavorData[index][1] += 1;
+        }
+        else
+        {
+            flavorData.push([graphDrinkList[i].split("~")[0],1]);
+        }
+    }
+
+    graph.updateData(flavorData);
+}
+
+function graphSwitchSortOrder()
+{
+    if (document.getElementById("graphSortDir").value == "▲") {
+        document.getElementById("graphSortDir").value = "▼";
+    }
+    else {
+        document.getElementById("graphSortDir").value = "▲";
+    }
+    graph.updateData(graph.swapOrder());
 }
 
 function flavorDataArray(arr, value)
@@ -132,36 +224,9 @@ function flavorDataArray(arr, value)
     return false;
 }
 
-function compareDates(date1, date2)
-{
-    let dateArr1 = date1.split("/");
-    let dateArr2 = date2.split("/");
-
-    if(dateArr1[2] > dateArr2[2])
-    {
-        return 1;
-    }
-    if(dateArr1[0] > dateArr2[0])
-    {
-        return 1;
-    }
-    if(dateArr1[1] > dateArr2[1])
-    {
-        return 1;
-    }
-    if(date1 == date2)
-    {
-        return 0;
-    }
-    else
-    {
-        return -1;
-    }
-
-}
 
 function editDrink(drinkName, drinkDate) {
-    console.log(drinkDate)
+    // console.log(drinkDate)
     let drinkIndex = (findIndexofDrink(drinkHistory, drinkName, drinkDate));
     let drinkEl = drinkHistory[drinkIndex].split("~");
 
@@ -185,14 +250,14 @@ function deleteDrink(drinkName, drinkDate)
 }
 
 function historyArraytoCookie(historyArray) {
-    console.log(historyArray);
+    // console.log(historyArray);
     let historyCookie = ""
     for (let i = 0; i < historyArray.length; i++) {
         if (historyArray[i].length > 2) {
             historyCookie += historyArray[i] + "|";
         }
     }
-    console.log(historyCookie);
+    // console.log(historyCookie);
     setCookie("drinkHistory", historyCookie, 800);
 }
 
